@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 
 export default function HomePage() {
@@ -27,7 +28,7 @@ export default function HomePage() {
         {/* Buttons */}
         <div className="flex justify-center lg:justify-start gap-4 md:gap-6 pt-6 flex-wrap">
           <button className="px-8 md:px-10 py-3 border-2 border-purple-500 text-purple-600 font-semibold rounded-lg hover:bg-purple-600 hover:text-white transition">
-            HIRE ME
+            Acheivements
           </button>
 
           <button className="px-8 md:px-10 py-3 border-2 border-purple-500 text-purple-600 font-semibold rounded-lg hover:bg-purple-600 hover:text-white transition">
