@@ -2,7 +2,7 @@
 
 export default function Services() {
   return (
-    <section className="w-full min-h-screen px-6 md:px-12 lg:px-24 py-20">
+    <section id="services" className="w-full min-h-screen px-6 md:px-12 lg:px-24 py-20 pt-32 scroll-mt-32">
       
       {/* Heading */}
       <div className="text-center space-y-3">

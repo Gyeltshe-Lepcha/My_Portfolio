@@ -2,7 +2,7 @@
 
 export default function AboutMe() {
   return (
-    <div className="min-h-screen px-4 sm:px-6 lg:px-12 py-8">
+    <section id = "about" className="min-h-screen px-4 sm:px-6 lg:px-12 py-8 pt-32 scroll-mt-32">
       {/* Page Title */}
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-gray-900 relative inline-block">
@@ -64,7 +64,7 @@ export default function AboutMe() {
           </Card>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 

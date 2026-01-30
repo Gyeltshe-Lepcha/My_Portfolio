@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function HomePage() {
   return (
-    <section className="w-full flex flex-col-reverse lg:flex-row items-center justify-between px-6 md:px-10 lg:px-24 py-14">
+    <section id="home" className="w-full flex flex-col-reverse lg:flex-row items-center justify-between px-6 md:px-10 lg:px-24 py-14 pt-32 scroll-mt-32">
       
       {/* LEFT SIDE TEXT */}
       <div className="max-w-xl space-y-6 text-center lg:text-left mt-10 lg:mt-0">
