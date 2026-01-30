@@ -41,13 +41,13 @@ export default function Navbar() {
       {/* Desktop Nav Links */}
       <div className="hidden md:flex items-center gap-8 text-gray-600 font-medium">
         <Link
-          href="/home"
+          href="#"
           className="flex items-center gap-2 px-5 py-2 rounded-xl bg-purple-100 text-purple-600 font-semibold"
         >
           🏠 Home
         </Link>
 
-        <Link href="/service" className="hover:text-purple-600 transition">
+        <Link href="#sevices" className="hover:text-purple-600 transition">
           ✨ Services
         </Link>
 

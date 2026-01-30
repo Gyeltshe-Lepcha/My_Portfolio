@@ -20,9 +20,12 @@ export default function HomePage() {
         </h1>
 
         {/* Subtitle */}
-        <p className="uppercase text-gray-800 tracking-wide font-medium leading-relaxed text-sm md:text-base">
-          Currently studying in college of science and <br />
-          technology
+        <p className="text-gray-800 tracking-wide font-medium leading-relaxed text-sm md:text-base">
+          I am an eager learner and engineering student with foundational knowledge in IoT, AI, machine learning, and
+          full-stack development. Experienced in lab-based projects and passionate about applying skills in real-world
+          environments. Approaches challenges as opportunities to grow, with a strong interest in integrating hardware
+          and software systems. I am good at problem-solving, teamwork, and adapting to new technologies, with a
+          strong drive to take on hands-on engineering tasks.
         </p>
 
         {/* Buttons */}
