@@ -1,40 +1,41 @@
-"user client";
+"use client";
 
 // contact.js
 
-export default function Contact() {
+export default function Contact({ contact, socialLinks = [], profile }) {
   return (
-    <div className="">
+    <section id="contact" className="js-section relative scroll-mt-32">
+      <div className="js-diagonal-wipe cinematic-diagonal-wipe" aria-hidden="true" />
       {/* Contact Section */}
       <div className="p-4 md:p-8">
-        <div className="mb-8 md:mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Ready to start a project?
+        <div className="js-scrub mb-8 md:mb-12">
+          <h1 className="js-reveal text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            {contact?.title || "Ready to start a project?"}
           </h1>
           
-          <p className="text-gray-700 text-lg md:text-xl leading-relaxed max-w-3xl">
-            I am always open to discussing new projects, creative ideas or opportunities to be part of your visions.
+          <p className="js-reveal text-gray-700 text-lg md:text-xl leading-relaxed max-w-3xl">
+            {contact?.description}
           </p>
         </div>
 
         {/* Buttons Section */}
-        <div className="flex flex-col sm:flex-row gap-4 md:gap-6 mb-16 md:mb-20">
+        <div className="js-reveal flex flex-col sm:flex-row gap-4 md:gap-6 mb-16 md:mb-20">
           <button className="px-8 py-4 bg-blue-600 text-white font-medium text-lg rounded-lg hover:bg-blue-700 transition-colors duration-300 flex-1 sm:flex-none">
-            Send an Email
+            {contact?.primaryCta || "Send an Email"}
           </button>
           
           <button className="px-8 py-4 border-2 border-gray-300 text-gray-800 font-medium text-lg rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors duration-300 flex-1 sm:flex-none">
-            View Profile
+            {contact?.secondaryCta || "View Profile"}
           </button>
         </div>
       </div>
 
       {/* Footer Section - Direct continuation */}
-      <div className="border-t border-gray-200 p-4 md:p-8 bg-white">
+      <div className="js-reveal border-t border-gray-200 p-4 md:p-8 bg-white">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             {/* Portfolio Name */}
             <div className="text-xl md:text-2xl font-bold text-gray-900">
-            LEPCHA PORTFOLIO
+            {(profile?.displayName || "LEPCHA").toUpperCase()} PORTFOLIO
             </div>
 
             {/* Social Icons */}
@@ -85,6 +86,6 @@ export default function Contact() {
             </div>
         </div>
         </div>
-    </div>
+    </section>
   );
 }

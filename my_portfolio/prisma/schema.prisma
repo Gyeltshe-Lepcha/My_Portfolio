@@ -1,0 +1,299 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  OTHER
+}
+
+model User {
+  id               String             @id @default(cuid())
+  name             String?
+  email            String             @unique
+  emailVerified    DateTime?
+  image            String?
+  passwordHash     String?
+  role             UserRole           @default(USER)
+  username         String?            @unique
+  slug             String?            @unique
+  publicIdentifier String?            @unique
+  shareCode        String?            @unique
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  accounts         Account[]
+  sessions         Session[]
+  profile          PortfolioProfile?
+  shareLinks       ShareLink[]
+  analytics        VisitorAnalytics[]
+
+  @@index([role])
+  @@index([slug])
+  @@index([username])
+  @@index([publicIdentifier])
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model PortfolioProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  displayName String
+  headline    String?
+  bio         String?
+  location    String?
+  avatarUrl   String?
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hero        HeroSection?
+  about       AboutSection?
+  projects    Project[]
+  skills      Skill[]
+  experiences Experience[]
+  contact     ContactInfo?
+  socialLinks SocialLink[]
+  mediaAssets MediaAsset[]
+
+  @@index([isPublic])
+}
+
+model HeroSection {
+  id          String   @id @default(cuid())
+  profileId   String   @unique
+  eyebrow     String   @default("HELLO")
+  title       String
+  highlighted String?
+  subtitle    String   @db.Text
+  primaryCta  String?
+  secondaryCta String?
+  imageUrl    String?
+  badgeLabel  String?
+  badgeTitle  String?
+  isVisible   Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile PortfolioProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model AboutSection {
+  id          String   @id @default(cuid())
+  profileId   String   @unique
+  title       String   @default("About Me")
+  details     Json?
+  abilities   String[]
+  progress    String[]
+  isVisible   Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile PortfolioProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  profileId   String
+  title       String
+  description String   @db.Text
+  imageUrl    String?
+  tags        String[]
+  url         String?
+  sourceUrl   String?
+  featured    Boolean  @default(false)
+  isVisible   Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile PortfolioProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, isVisible, order])
+  @@index([featured])
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  profileId String
+  name      String
+  category  String?
+  level     Int?
+  icon      String?
+  featured  Boolean  @default(false)
+  isVisible Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile PortfolioProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, isVisible, order])
+}
+
+model Experience {
+  id          String    @id @default(cuid())
+  profileId   String
+  title       String
+  organization String?
+  period      String?
+  description String?   @db.Text
+  type        String?
+  icon        String?
+  actionLabel String?
+  featured    Boolean   @default(false)
+  isVisible   Boolean   @default(true)
+  order       Int       @default(0)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  profile PortfolioProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, isVisible, order])
+}
+
+model ContactInfo {
+  id          String   @id @default(cuid())
+  profileId   String   @unique
+  title       String
+  description String   @db.Text
+  email       String?
+  phone       String?
+  location    String?
+  primaryCta  String?
+  secondaryCta String?
+  isVisible   Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile PortfolioProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  profileId String
+  label     String
+  url       String
+  icon      String?
+  isVisible Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile PortfolioProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, isVisible, order])
+}
+
+model MediaAsset {
+  id        String    @id @default(cuid())
+  profileId String
+  type      MediaType @default(IMAGE)
+  title     String?
+  url       String
+  alt       String?
+  provider  String?
+  publicId  String?
+  featured  Boolean   @default(false)
+  isVisible Boolean   @default(true)
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  profile PortfolioProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, isVisible, order])
+}
+
+model ShareLink {
+  id           String    @id @default(cuid())
+  userId       String
+  slug         String    @unique
+  customAlias  String?   @unique
+  title        String?
+  note         String?
+  active       Boolean   @default(true)
+  expiresAt    DateTime?
+  visitCount   Int       @default(0)
+  lastOpenedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analytics VisitorAnalytics[]
+
+  @@index([userId, active])
+  @@index([expiresAt])
+}
+
+model VisitorAnalytics {
+  id          String   @id @default(cuid())
+  userId      String?
+  shareLinkId String?
+  path        String
+  referrer    String?
+  userAgent   String?
+  ipHash      String?
+  createdAt   DateTime @default(now())
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shareLink ShareLink? @relation(fields: [shareLinkId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([shareLinkId, createdAt])
+}

@@ -3,45 +3,22 @@
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-export default function Projects() {
-  const projects = [
-    {
-      id: 1,
-      title: 'Project 1',
-      description: 'A brief description of project 1 and its key features.',
-      tags: ['FLUTTER', 'DART', 'FIREBASE'],
-      image: 'https://source.unsplash.com/random/400x300?tech,1'
-    },
-    {
-      id: 2,
-      title: 'Project 2',
-      description: 'An advanced analytics dashboard for business management.',
-      tags: ['REACT', 'TYPESCRIPT', 'TAILWIND'],
-      image: 'https://source.unsplash.com/random/400x300?tech,2'
-    },
-    {
-      id: 3,
-      title: 'Project 3',
-      description: 'Real-time messaging application with end-to-end encryption.',
-      tags: ['NODE.JS', 'SOCKET.IO', 'FLUTTER'],
-      image: 'https://source.unsplash.com/random/400x300?tech,3'
-    }
-  ];
-
+export default function Projects({ projects = [] }) {
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <section id="projects" className="js-section relative min-h-screen p-4 md:p-8 scroll-mt-32">
+      <div className="js-diagonal-wipe cinematic-diagonal-wipe" aria-hidden="true" />
       {/* Header Section */}
-      <div className="mb-8 md:mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+      <div className="js-scrub mb-8 md:mb-12">
+        <h1 className="js-reveal text-3xl md:text-4xl font-bold text-gray-900 mb-2">
           My Projects
         </h1>
-        <p className="text-gray-600 text-base md:text-lg">
+        <p className="js-reveal text-gray-600 text-base md:text-lg">
           Explore my latest work and projects
         </p>
       </div>
 
       {/* Search Bar */}
-      <div className="mb-8 md:mb-10">
+      <div className="js-reveal mb-8 md:mb-10">
         <div className="relative max-w-md">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
@@ -55,7 +32,7 @@ export default function Projects() {
       </div>
 
       {/* Projects Found Label */}
-      <div className="mb-6 md:mb-8">
+      <div className="js-reveal mb-6 md:mb-8">
         <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
           FOUND {projects.length} PROJECTS
         </span>
@@ -66,13 +43,14 @@ export default function Projects() {
         {projects.map((project) => (
           <div
             key={project.id}
-            className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300"
+            className="js-reveal js-scrub border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300"
           >
             {/* Project Image */}
             <img
-              src={project.image}
+              src={project.imageUrl || project.image}
               alt={project.title}
-              className="w-full h-48 object-cover"
+              loading="lazy"
+              className="js-image-reveal js-mask-reveal w-full h-48 object-cover"
             />
 
             <div className="p-6">
@@ -103,6 +81,6 @@ export default function Projects() {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
