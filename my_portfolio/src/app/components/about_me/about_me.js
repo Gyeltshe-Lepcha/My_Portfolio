@@ -1,12 +1,13 @@
 "use client";
 
-export default function AboutMe() {
+export default function AboutMe({ about }) {
   return (
-    <div className="min-h-screen px-4 sm:px-6 lg:px-12 py-8">
+    <section id="about" className="js-section relative min-h-screen px-4 sm:px-6 lg:px-12 py-8 pt-32 scroll-mt-32">
+      <div className="js-diagonal-wipe cinematic-diagonal-wipe" aria-hidden="true" />
       {/* Page Title */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900 relative inline-block">
-          About Me
+      <div className="js-scrub mb-10">
+        <h1 className="js-reveal text-3xl font-bold text-gray-900 relative inline-block">
+          {about?.title || "About Me"}
           <span className="absolute left-0 -bottom-2 h-1 w-16 bg-purple-600 rounded-full"></span>
         </h1>
       </div>
@@ -17,25 +18,15 @@ export default function AboutMe() {
         <div className="space-y-8">
           {/* Personal Details */}
           <Card title="Personal Details" icon="👤">
-            <InfoRow label="Name" value="Lepcha" />
-            <InfoRow
-              label="Studies"
-              value="College of Science and Technology"
-            />
-            <InfoRow label="Location" value="Bhutan" />
+            {(about?.details || []).map((item) => (
+              <InfoRow key={item.label} label={item.label} value={item.value} />
+            ))}
           </Card>
 
           {/* Skills & Abilities */}
           <Card title="Skills & Abilities" icon="🧠">
             <div className="flex flex-wrap gap-3">
-              {[
-                "Coding",
-                "Flutter",
-                "Dart",
-                "Firebase",
-                "UI/UX Design",
-                "Mobile Development",
-              ].map((skill) => (
+              {(about?.abilities || []).map((skill) => (
                 <span
                   key={skill}
                   className="px-4 py-2 rounded-full border border-purple-200 text-purple-600 text-sm font-medium bg-white hover:bg-purple-50 transition"
@@ -51,20 +42,20 @@ export default function AboutMe() {
         <div className="space-y-8">
           {/* Experience */}
           <Card title="Experience" icon="💼">
-            <Bullet text="Developing Mobile Apps" />
-            <Bullet text="UI/UX Prototyping" />
-            <Bullet text="CS Student Projects" />
+            {(about?.experience || []).map((item) => (
+              <Bullet key={item} text={item} />
+            ))}
           </Card>
 
           {/* Academic Progress */}
           <Card title="Academic Progress" icon="🎓">
-            <Bullet text="Core Engineering Sciences" />
-            <Bullet text="Algorithm Design" />
-            <Bullet text="User-Centric Applications" />
+            {(about?.progress || []).map((item) => (
+              <Bullet key={item} text={item} />
+            ))}
           </Card>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -72,7 +63,7 @@ export default function AboutMe() {
 
 function Card({ title, icon, children }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+    <div className="js-reveal js-scrub bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-100 text-purple-600">
           {icon}
