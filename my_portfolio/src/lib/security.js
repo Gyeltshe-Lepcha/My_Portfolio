@@ -1,9 +1,10 @@
 import crypto from "crypto";
+import { authConfig } from "./config";
 
 const buckets = new Map();
 
 export function hashIp(value = "") {
-  return crypto.createHash("sha256").update(`${value}:${process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "dev"}`).digest("hex");
+  return crypto.createHash("sha256").update(`${value}:${authConfig.secret}`).digest("hex");
 }
 
 export function rateLimit(key, limit = 8, windowMs = 60_000) {

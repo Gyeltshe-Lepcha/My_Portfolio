@@ -35,4 +35,36 @@ Framework: Next.js
 Language: JavaScript
 Styling: Tailwind CSS
 Animations: Modern UI motion effects
+
+Environment Configuration
+Create `.env.local` for local development. Do not commit real secrets.
+
+Generate the required authentication secret:
+
+```bash
+pnpm secret:generate
+```
+
+Use the generated value as the single source of truth:
+
+```env
+AUTH_SECRET="paste-generated-value-here"
+```
+
+`NEXTAUTH_SECRET` is optional legacy compatibility and should match
+`AUTH_SECRET` only if you choose to set it.
+
+Core environment variables:
+
+```env
+DATABASE_URL=
+DIRECT_URL=
+AUTH_SECRET=
+NEXTAUTH_SECRET=
+AUTH_TRUST_HOST=true
+CLOUDINARY_URL=
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+Runtime configuration is centralized in `src/lib/config.js`.
 © Personal Portfolio

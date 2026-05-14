@@ -5,19 +5,20 @@ import { logoutAction } from "@/actions/authActions";
 import { createShareLinkAction, toggleShareLinkAction, updateContactAction, updateHeroAction, updateProfileAction, updateSectionJsonAction } from "@/actions/dashboardActions";
 import { getPortfolioByOwnerId } from "@/services/portfolioService";
 import { prisma } from "@/lib/prisma";
+import { appConfig, databaseConfig } from "@/lib/config";
 
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
 
   const portfolio = await getPortfolioByOwnerId(session.user.id);
-  const shareLinks = process.env.DATABASE_URL
+  const shareLinks = databaseConfig.hasDatabaseUrl
     ? await prisma.shareLink.findMany({
         where: { userId: session.user.id },
         orderBy: { createdAt: "desc" },
       })
     : [];
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = appConfig.appUrl;
 
   return (
     <main className="cinematic-shell min-h-screen px-4 py-8 md:px-8">

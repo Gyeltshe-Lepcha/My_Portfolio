@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "./lib/prisma";
+import { authConfig, requireAuthSecret } from "./lib/config";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -17,11 +18,11 @@ export const {
   auth,
 } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-  trustHost: true,
+  secret: requireAuthSecret(),
+  trustHost: authConfig.trustHost,
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
+    maxAge: authConfig.sessionMaxAge,
   },
   pages: {
     signIn: "/auth/login",
@@ -75,12 +76,12 @@ export const {
   },
   cookies: {
     sessionToken: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}authjs.session-token`,
+      name: authConfig.sessionCookieName,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: authConfig.secureCookies,
       },
     },
   },

@@ -1,36 +1,20 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { appConfig, databaseConfig } from "./config";
 
 const globalForPrisma = globalThis;
 
-function normalizePostgresUrl(url) {
-  if (!url) return url;
-
-  try {
-    const parsed = new URL(url);
-    const sslMode = parsed.searchParams.get("sslmode");
-    if (["require", "prefer", "verify-ca"].includes(sslMode)) {
-      parsed.searchParams.set("sslmode", "verify-full");
-    }
-    return parsed.toString();
-  } catch {
-    return url;
-  }
-}
-
 const adapter = new PrismaPg({
-  connectionString: normalizePostgresUrl(
-    process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/postgres"
-  ),
+  connectionString: databaseConfig.runtimeUrl,
 });
 
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["warn"] : [],
+    log: appConfig.nodeEnv === "development" ? ["warn"] : [],
   });
 
-if (process.env.NODE_ENV !== "production") {
+if (!appConfig.isProduction) {
   globalForPrisma.prisma = prisma;
 }

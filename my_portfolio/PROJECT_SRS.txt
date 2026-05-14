@@ -987,10 +987,15 @@ DIRECT_URL
 - For Neon, this should not use the -pooler host.
 
 NEXTAUTH_SECRET
-- Secret used by NextAuth/Auth.js session signing and security.
+- Optional legacy compatibility secret. The application uses AUTH_SECRET as the
+  primary source of truth internally. If this is set, it should match
+  AUTH_SECRET, but new deployments should prefer AUTH_SECRET.
 
 AUTH_SECRET
-- Auth.js secret. Also used by project IP hash fallback logic.
+- Primary Auth.js secret. This is the single shared secret used internally for
+  Auth.js session/JWT signing and analytics IP hashing. It must be stable across
+  restarts and deployments. Generate with:
+  pnpm secret:generate
 
 AUTH_TRUST_HOST
 - Allows Auth.js to trust the deployment host/proxy environment. Required for
@@ -1314,6 +1319,7 @@ because there are no tables to introspect.
 [x] Add signup/login/logout.
 [x] Hash passwords with bcryptjs.
 [x] Add Auth.js credentials provider.
+[x] Centralize auth secret handling in src/lib/config.js.
 [x] Protect dashboard with middleware and server-side auth check.
 [x] Add basic in-memory API rate limiting.
 [ ] Move rate limiting to durable shared store for production.

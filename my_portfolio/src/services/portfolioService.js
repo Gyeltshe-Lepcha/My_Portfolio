@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { defaultPortfolio } from "@/data/defaultPortfolio";
+import { databaseConfig } from "@/lib/config";
 
 function isExpectedDatabaseSetupError(error) {
   return ["P1000", "P1001", "P2021"].includes(error?.code);
@@ -70,7 +71,7 @@ const includePortfolio = {
 export const getDefaultPortfolio = cache(async () => defaultPortfolio);
 
 export const getPortfolioByOwnerId = cache(async (userId) => {
-  if (!process.env.DATABASE_URL || !userId) return defaultPortfolio;
+  if (!databaseConfig.hasDatabaseUrl || !userId) return defaultPortfolio;
 
   try {
     const user = await prisma.user.findUnique({
@@ -87,7 +88,7 @@ export const getPortfolioByOwnerId = cache(async (userId) => {
 });
 
 export const getPrimaryPortfolio = cache(async () => {
-  if (!process.env.DATABASE_URL) return defaultPortfolio;
+  if (!databaseConfig.hasDatabaseUrl) return defaultPortfolio;
 
   try {
     const user = await prisma.user.findFirst({
@@ -105,7 +106,7 @@ export const getPrimaryPortfolio = cache(async () => {
 });
 
 export async function getPortfolioBySlug(slug) {
-  if (!process.env.DATABASE_URL || !slug) return slug === defaultPortfolio.owner.slug ? defaultPortfolio : null;
+  if (!databaseConfig.hasDatabaseUrl || !slug) return slug === defaultPortfolio.owner.slug ? defaultPortfolio : null;
 
   const user = await prisma.user.findFirst({
     where: {

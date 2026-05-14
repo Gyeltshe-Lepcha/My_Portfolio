@@ -1,10 +1,11 @@
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { hashIp } from "@/lib/security";
+import { databaseConfig } from "@/lib/config";
 import { getPortfolioByOwnerId } from "@/services/portfolioService";
 
 export async function resolveShareLink(identifier) {
-  if (!process.env.DATABASE_URL || !identifier) return null;
+  if (!databaseConfig.hasDatabaseUrl || !identifier) return null;
 
   const shareLink = await prisma.shareLink.findFirst({
     where: {

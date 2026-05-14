@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { signIn, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireDatabaseUrl } from "@/lib/config";
 import { slugify, shortSuffix } from "@/lib/slug";
 import { defaultPortfolio } from "@/data/defaultPortfolio";
 
@@ -20,9 +21,7 @@ const authSchema = z.object({
 });
 
 function requireDatabase() {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is required for authentication and dashboard writes.");
-  }
+  requireDatabaseUrl();
 }
 
 export async function signupAction(_prevState, formData) {

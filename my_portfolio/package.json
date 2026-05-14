@@ -9,7 +9,9 @@
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "secret:generate": "node scripts/generate-secret.mjs",
+    "env:setup": "node scripts/setup-local-env.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
