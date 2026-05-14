@@ -2,8 +2,26 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis;
+
+function normalizePostgresUrl(url) {
+  if (!url) return url;
+
+  try {
+    const parsed = new URL(url);
+    const sslMode = parsed.searchParams.get("sslmode");
+    if (["require", "prefer", "verify-ca"].includes(sslMode)) {
+      parsed.searchParams.set("sslmode", "verify-full");
+    }
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/postgres",
+  connectionString: normalizePostgresUrl(
+    process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/postgres"
+  ),
 });
 
 export const prisma =

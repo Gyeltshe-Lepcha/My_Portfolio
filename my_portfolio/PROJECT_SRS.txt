@@ -992,6 +992,11 @@ NEXTAUTH_SECRET
 AUTH_SECRET
 - Auth.js secret. Also used by project IP hash fallback logic.
 
+AUTH_TRUST_HOST
+- Allows Auth.js to trust the deployment host/proxy environment. Required for
+  hosted environments such as Vercel when Auth.js cannot infer the trusted host
+  safely.
+
 CLOUDINARY_URL
 - Reserved for future media upload/storage integration.
 

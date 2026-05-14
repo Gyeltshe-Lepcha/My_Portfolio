@@ -13,6 +13,10 @@ const authSchema = z.object({
   name: z.string().min(2).max(80).optional(),
   email: z.string().email(),
   password: z.string().min(8).max(128),
+  confirmPassword: z.string().min(8).max(128).optional(),
+}).refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
 });
 
 function requireDatabase() {
@@ -28,22 +32,38 @@ export async function signupAction(_prevState, formData) {
       name: formData.get("name") || undefined,
       email: String(formData.get("email") || "").toLowerCase(),
       password: formData.get("password"),
+      confirmPassword: formData.get("confirmPassword"),
     });
-
-    const existing = await prisma.user.findUnique({ where: { email: parsed.email } });
-    if (existing) return { error: "An account with this email already exists." };
 
     const passwordHash = await bcrypt.hash(parsed.password, 12);
     const baseSlug = slugify(parsed.name || parsed.email.split("@")[0]);
+    const username = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+    const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+    const publicIdentifier = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+
+    const existing = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: parsed.email },
+          { username },
+          { slug },
+          { publicIdentifier },
+        ],
+      },
+      select: { email: true, username: true, slug: true, publicIdentifier: true },
+    });
+
+    if (existing?.email === parsed.email) return { error: "An account with this email already exists." };
+    if (existing) return { error: "Generated username is already taken. Please try again." };
 
     await prisma.user.create({
       data: {
         name: parsed.name,
         email: parsed.email,
         passwordHash,
-        username: `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`,
-        slug: `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`,
-        publicIdentifier: `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`,
+        username,
+        slug,
+        publicIdentifier,
         profile: {
           create: {
             displayName: parsed.name || defaultPortfolio.profile.displayName,
@@ -90,14 +110,10 @@ export async function signupAction(_prevState, formData) {
       },
     });
 
-    await signIn("credentials", {
-      email: parsed.email,
-      password: parsed.password,
-      redirectTo: "/dashboard",
-    });
+    return { ok: true, message: "Account created successfully. Redirecting to login..." };
   } catch (error) {
-    if (error instanceof AuthError) return { error: "Account created, but login failed. Please sign in." };
     if (error?.message?.includes("NEXT_REDIRECT")) throw error;
+    if (error?.issues?.[0]?.message) return { error: error.issues[0].message };
     return { error: error.message || "Unable to create account." };
   }
 }
