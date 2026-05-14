@@ -4,7 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "./lib/prisma";
-import { authConfig, requireAuthSecret } from "./lib/config";
+import { authConfig } from "./lib/config";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -18,7 +18,7 @@ export const {
   auth,
 } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  secret: requireAuthSecret(),
+  secret: authConfig.secret,
   trustHost: authConfig.trustHost,
   session: {
     strategy: "jwt",
