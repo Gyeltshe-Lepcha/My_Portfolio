@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Personal Portfolio
+Overview
+Personal Portfolio is a modern and responsive website created to showcase my projects, skills, and professional profile. It provides a clean digital presence where visitors can explore my work, learn about my expertise, and connect with me easily.
 
-## Getting Started
+The portfolio combines smooth animations, structured content, and an interactive design to deliver an engaging browsing experience.
 
-First, run the development server:
+Intended Audience
+Personal Portfolio is intended for:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Recruiters and hiring managers
+Clients looking for development services
+Professional networking and collaboration
+Anyone interested in my projects and skills
+Key Features
+Interactive User Interface
+Smooth transitions and modern animations for an engaging experience.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Project Showcase
+Dedicated sections to display featured projects with details and technologies used.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Responsive Design
+Optimized for all screen sizes including mobile, tablet, and desktop.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Modern Styling
+Clean and consistent UI built with Tailwind CSS.
 
-## Learn More
+Fast and Optimized Performance
+Efficient structure for quick loading and better accessibility.
 
-To learn more about Next.js, take a look at the following resources:
+Platform
+Web Application
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Technology Stack
+Framework: Next.js
+Language: JavaScript
+Styling: Tailwind CSS
+Animations: Modern UI motion effects
+© Personal Portfolio
