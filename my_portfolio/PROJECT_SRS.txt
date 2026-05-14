@@ -1,0 +1,1368 @@
+SOFTWARE REQUIREMENTS SPECIFICATION AND ARCHITECTURE REFERENCE
+PROJECT: Cinematic Dynamic Portfolio Platform
+FILE: PROJECT_SRS.txt
+LAST UPDATED: 2026-05-14
+
+======================================================================
+1. PROJECT OVERVIEW
+======================================================================
+
+1.1 Purpose
+-----------
+This project is a full-stack dynamic portfolio platform built around a
+cinematic, continuous-scroll presentation. The public portfolio is intended to
+feel less like a traditional multi-section website and more like an immersive
+digital trailer: one seamless visual sequence with shared atmospheric layers,
+scroll-linked motion, parallax, and progressive section transitions.
+
+The system combines:
+- A public animated portfolio experience.
+- A protected admin dashboard.
+- PostgreSQL-backed portfolio content.
+- Auth.js/NextAuth credentials authentication.
+- Human-readable shareable portfolio links.
+- Prisma ORM for database modeling and queries.
+
+1.2 Vision
+----------
+The long-term vision is to evolve this portfolio into a reusable personal
+branding platform where the owner can edit content, publish customized public
+portfolio links, track basic visits, and maintain a premium cinematic interface
+without manually changing frontend code.
+
+The visual direction is inspired by Rockstar / GTA VI style web presentations:
+- immersive visual continuity
+- dramatic motion language
+- cinematic layers
+- atmospheric gradients and light leaks
+- one-page storytelling
+- premium visual pacing
+
+1.3 Target Audience
+-------------------
+Primary users:
+- Portfolio owner / administrator.
+- Recruiters, collaborators, clients, and visitors viewing the public portfolio.
+
+Secondary users:
+- Developers maintaining or extending the codebase.
+- Future contributors implementing analytics, richer CMS editing, multi-user
+  features, or media storage.
+
+1.4 Major Capabilities
+----------------------
+Implemented capabilities include:
+- Public portfolio rendering from database-backed content with fallback data.
+- Responsive animated portfolio sections:
+  home, services, about, projects, education, gallery, and contact.
+- GSAP ScrollTrigger animation system.
+- Custom inertia-style smooth scrolling.
+- Protected admin dashboard.
+- Credentials signup/login/logout.
+- Prisma schema for Auth.js and CMS data.
+- Human-readable share-link routes and visit tracking.
+- Vercel deployment configuration.
+
+
+======================================================================
+2. SYSTEM GOALS
+======================================================================
+
+2.1 Product Goals
+-----------------
+- Present the portfolio as a cinematic scroll experience rather than a static
+  website.
+- Make all public content editable through admin-controlled data.
+- Keep the public portfolio accessible without login.
+- Restrict dashboard access to authenticated users.
+- Support branded shareable URLs that are easy to read and remember.
+- Preserve a scalable data model for future multi-user expansion.
+
+2.2 Experience Goals
+--------------------
+- Sections should visually connect through overlapping transitions.
+- Backgrounds should feel global rather than section-specific.
+- Animation should use a consistent motion language.
+- Desktop should preserve a cinematic full-width experience.
+- Mobile should retain accessible navigation through a hamburger menu and
+  slide-in drawer.
+
+2.3 Scalability Goals
+---------------------
+- Keep backend logic modular through services and server actions.
+- Keep database relations normalized around User and PortfolioProfile.
+- Keep animation logic isolated in reusable hooks.
+- Keep Prisma queries selective and ordered.
+- Prepare for future richer dashboard modules without changing the public UI.
+
+
+======================================================================
+3. TECH STACK
+======================================================================
+
+3.1 Frontend
+------------
+Next.js 16.1.4 App Router
+- Provides server components, route handlers, file-based routing, and Vercel
+  deployment compatibility.
+- Used for public pages, auth pages, dashboard pages, API routes, and dynamic
+  share routes.
+
+React 19.2.3
+- Used for component composition and client-side interactivity.
+- Client components are used where hooks, local state, and browser APIs are
+  required.
+
+Tailwind CSS 4
+- Used for utility-first styling.
+- Supports responsive design, glassmorphism panels, spacing, typography, and
+  cinematic layout treatments.
+
+GSAP 3.15.0 and ScrollTrigger
+- Core animation engine.
+- Used for scroll reveals, pinned hero behavior, parallax movement, section
+  crossfades, ambient background changes, masks, and scrubbed timelines.
+
+Heroicons / Lucide React
+- Icon libraries available in dependencies.
+- Current project uses Heroicons in the projects search bar.
+
+Framer Motion
+- Not currently installed or used.
+
+3.2 Backend
+-----------
+Prisma 7.8.0
+- ORM for PostgreSQL schema, generated client, migrations, and relational data
+  access.
+- Prisma 7 requires datasource configuration in prisma.config.ts rather than
+  url fields in schema.prisma.
+
+PostgreSQL
+- Primary relational database.
+- Neon PostgreSQL is the expected hosted database provider based on current
+  deployment setup.
+
+@prisma/adapter-pg and pg
+- Prisma 7 PostgreSQL adapter runtime.
+- Allows Prisma Client to connect using PostgreSQL connection strings.
+
+Auth.js / NextAuth 5 beta
+- Authentication framework.
+- Provides credential-based login, JWT sessions, auth route handlers, server
+  helpers, and Auth.js Prisma adapter integration.
+
+bcryptjs
+- Password hashing for credentials signup and login.
+
+zod
+- Runtime validation for credentials, dashboard mutations, and API payloads.
+
+
+======================================================================
+4. CURRENT IMPLEMENTED FEATURES
+======================================================================
+
+4.1 Public Pages and Routes
+---------------------------
+Implemented App Router routes:
+- /                         Public primary portfolio.
+- /components                Existing component page route generated by folder.
+- /auth/login                Login page.
+- /auth/signup               Signup page.
+- /dashboard                 Protected admin dashboard.
+- /portfolio/[slug]          Public portfolio by slug, username, or identifier.
+- /u/[username]              Public portfolio by username.
+- /view/[identifier]         Share-link based portfolio view.
+- /access-denied             Cinematic invalid/expired share-link page.
+- /api/auth/[...nextauth]    Auth.js route handler.
+- /api/admin/portfolio       Protected admin portfolio API.
+- /api/admin/projects        Protected project creation API.
+
+4.2 Public Portfolio Components
+-------------------------------
+src/app/components/page.js
+- Client shell for the cinematic public experience.
+- Mounts navbar, ambient layers, light leaks, vignette, and section components.
+- Initializes smooth scrolling, scroll reveal, parallax, and cinematic scrub
+  hooks.
+
+src/app/components/home/home.js
+- Hero section.
+- Uses pinned GSAP behavior via usePinnedSection.
+- Reads hero/profile data through props.
+
+src/app/components/service/services.js
+- Services grid.
+- Reads dynamic service items from portfolio data.
+
+src/app/components/about_me/about_me.js
+- Personal details, abilities, experience, and academic progress.
+- Reads dynamic about data.
+
+src/app/components/project/projects.js
+- Project cards and search input UI.
+- Reads dynamic projects.
+
+src/app/components/education/education.js
+- Education journey items.
+- Reads dynamic education data.
+
+src/app/components/gallery/gallery.js
+- Gallery grid with "See More" local state.
+- Reads dynamic media assets.
+
+src/app/components/contact/contact.js
+- Contact CTA and footer.
+- Reads contact/profile/social data partially. Social link rendering still uses
+  fixed SVG positions and should be expanded in future work.
+
+src/app/components/navbar/navbar.js
+- Fixed navbar.
+- Desktop shows link row.
+- Mobile shows animated hamburger and slide-in drawer.
+- Profile/avatar button links to /auth/login.
+- Hamburger is hidden on large screens.
+
+src/app/components/animations/AmbientMotion.js
+- Global atmospheric background layer with animated glows, color fields, fog,
+  particles, and grain.
+
+4.3 Animation Hooks
+-------------------
+src/app/hooks/useSmoothScroll.js
+- Custom requestAnimationFrame-based lerped scrolling.
+- Intercepts wheel/touch movement.
+- Handles anchor navigation.
+- Disabled for reduced-motion users.
+
+src/app/hooks/useScrollReveal.js
+- Uses GSAP fromTo animations for reveal items, image reveals, and radial/mask
+  reveals.
+- Uses section-level ScrollTrigger configuration.
+
+src/app/hooks/useParallax.js
+- Applies page-wide parallax to elements with data-speed.
+- Uses gsap.matchMedia for mobile/desktop travel intensity.
+
+src/app/hooks/useCinematicScrub.js
+- Animates global ambient progress.
+- Scrubs light leaks.
+- Crossfades adjacent sections.
+- Animates diagonal clip-path wipes.
+
+src/app/hooks/usePinnedSection.js
+- Pins hero section.
+- Scrubs hero media scale/blur, content fade/translate, and overlay fade.
+
+4.4 Backend Services and Utilities
+----------------------------------
+src/services/portfolioService.js
+- Loads primary, owner-specific, and slug-based portfolios.
+- Normalizes Prisma relational data into the shape expected by frontend
+  components.
+- Falls back to src/data/defaultPortfolio.js for missing database, invalid DB
+  setup, missing tables, or public unauthenticated rendering.
+
+src/services/shareService.js
+- Resolves active share links.
+- Rejects inactive or expired links.
+- Updates visit count and last-opened timestamp.
+- Creates VisitorAnalytics records.
+
+src/lib/prisma.js
+- Creates singleton Prisma Client using PrismaPg adapter.
+- Uses DATABASE_URL at runtime.
+
+src/lib/slug.js
+- Provides slugify, shortSuffix, and publicIdentifierFor helpers.
+
+src/lib/security.js
+- Provides in-memory rate limiting.
+- Hashes IP-like values for analytics privacy.
+
+4.5 Server Actions
+------------------
+src/actions/authActions.js
+- signupAction
+- loginAction
+- logoutAction
+
+src/actions/dashboardActions.js
+- updateProfileAction
+- updateHeroAction
+- updateContactAction
+- createShareLinkAction
+- updateSectionJsonAction
+- toggleShareLinkAction
+
+4.6 Middleware
+--------------
+middleware.js
+- Protects /dashboard routes by checking for Auth.js/NextAuth session cookie.
+- Redirects unauthenticated requests to /auth/login with callbackUrl.
+
+4.7 Prisma Migration State
+--------------------------
+The repository contains:
+- prisma/schema.prisma
+- prisma.config.ts
+- prisma/migrations/20260514055533_init/migration.sql
+- prisma/migrations/migration_lock.toml
+
+The build script runs:
+- prisma generate
+- next build
+
+
+======================================================================
+5. FRONTEND ARCHITECTURE
+======================================================================
+
+5.1 Component Structure
+-----------------------
+The public frontend is organized by portfolio section:
+- components/home
+- components/service
+- components/about_me
+- components/project
+- components/education
+- components/gallery
+- components/contact
+- components/navbar
+- components/animations
+
+The public entry route src/app/page.js is a server component that fetches
+portfolio data via getPrimaryPortfolio and passes it into the client
+ComponentsPage shell.
+
+5.2 Data Flow
+-------------
+Route:
+  src/app/page.js
+
+Data service:
+  getPrimaryPortfolio()
+
+Client shell:
+  ComponentsPage({ portfolio })
+
+Sections:
+  HomePage(hero, profile)
+  Services(services)
+  AboutMe(about)
+  Projects(projects)
+  Education(education)
+  Gallery(gallery, profile)
+  Contact(contact, socialLinks, profile)
+
+This preserves the existing UI while replacing hardcoded section data with a
+normalized portfolio data object.
+
+5.3 Animation System Integration
+--------------------------------
+ComponentsPage creates a pageRef and passes it to animation hooks:
+- useSmoothScroll()
+- useScrollReveal(pageRef)
+- useParallax(pageRef)
+- useCinematicScrub(pageRef)
+
+Section components expose animation targets using CSS classes:
+- js-section
+- js-reveal
+- js-image-reveal
+- js-mask-reveal
+- js-scrub
+- js-diagonal-wipe
+- js-pin-content
+- js-pin-media
+- js-hero-overlay
+
+5.4 Scroll Architecture
+-----------------------
+The scroll experience is continuous:
+- useSmoothScroll controls wheel/touch interpolation.
+- useCinematicScrub links adjacent sections with crossfade/blur/translate.
+- useParallax applies motion relative to the full page instead of each isolated
+  section.
+- Global ambient layers persist across sections.
+
+5.5 Responsive Behavior
+-----------------------
+Desktop:
+- Full navbar link row is displayed.
+- Hamburger menu is hidden.
+- Cinematic full-width layout is preserved.
+
+Mobile and small tablets:
+- Hamburger button is visible.
+- Slide-in menu drawer is available.
+- Drawer animation uses GSAP.
+- Touch-friendly navigation is preserved.
+
+Reduced motion:
+- CSS and hook checks disable animation-heavy behavior for users with
+  prefers-reduced-motion.
+
+
+======================================================================
+6. BACKEND ARCHITECTURE
+======================================================================
+
+6.1 Backend Layers
+------------------
+The backend is structured into:
+- Auth configuration: src/auth.js
+- Server actions: src/actions
+- Route handlers: src/app/api
+- Services: src/services
+- Prisma client and utilities: src/lib
+- Middleware: middleware.js
+
+6.2 API Structure
+-----------------
+Auth:
+- /api/auth/[...nextauth]
+  Exports Auth.js GET and POST handlers.
+
+Admin portfolio:
+- GET /api/admin/portfolio
+  Returns normalized portfolio for authenticated user.
+- PATCH /api/admin/portfolio
+  Updates profile-level fields after zod validation.
+
+Admin projects:
+- POST /api/admin/projects
+  Creates a project for authenticated user's profile after zod validation.
+
+6.3 Services
+------------
+portfolioService:
+- Encapsulates portfolio read queries and normalization.
+- Includes profile, hero, about, projects, skills, experiences, contact,
+  socialLinks, and mediaAssets.
+- Protects public rendering with fallback data for expected setup errors.
+
+shareService:
+- Encapsulates share link lookup and analytics writes.
+- Uses transaction for visit count and analytics record.
+
+6.4 Validation Strategy
+-----------------------
+Validation is implemented with zod in:
+- src/auth.js for credentials authorize input.
+- src/actions/authActions.js for signup input.
+- src/actions/dashboardActions.js for profile and hero updates.
+- src/app/api/admin/portfolio/route.js for PATCH payload.
+- src/app/api/admin/projects/route.js for POST payload.
+
+JSON dashboard section editing currently parses JSON directly and validates
+basic shape. This should be replaced with section-specific zod schemas in a
+future hardening phase.
+
+6.5 Error Strategy
+------------------
+Public portfolio read operations fall back to default content for expected DB
+setup errors:
+- P1000 invalid credentials
+- P1001 database unreachable
+- P2021 missing tables
+
+Admin and auth operations return action-level errors or HTTP errors because
+they require a configured database.
+
+
+======================================================================
+7. DATABASE DESIGN
+======================================================================
+
+7.1 Overview
+------------
+The database is modeled around User ownership. A User owns one
+PortfolioProfile. The profile owns all editable portfolio content. ShareLink
+belongs to User because it represents publishing/visibility controlled by the
+account owner.
+
+7.2 Models
+----------
+
+User
+- Purpose: Authenticated account owner.
+- Fields: id, name, email, emailVerified, image, passwordHash, role, username,
+  slug, publicIdentifier, shareCode, timestamps.
+- Relationships:
+  - accounts
+  - sessions
+  - profile
+  - shareLinks
+  - analytics
+- Constraints:
+  - email unique
+  - username unique
+  - slug unique
+  - publicIdentifier unique
+  - shareCode unique
+- Indexes:
+  - role
+  - slug
+  - username
+  - publicIdentifier
+
+Account
+- Purpose: Auth.js OAuth/account compatibility.
+- Current credentials flow does not depend on external OAuth, but the model is
+  present for Auth.js adapter readiness.
+- Composite primary key: provider + providerAccountId.
+
+Session
+- Purpose: Auth.js database session compatibility.
+- Current Auth.js configuration uses JWT strategy, but the model remains for
+  adapter completeness and future session strategy changes.
+
+VerificationToken
+- Purpose: Auth.js verification/email flow readiness.
+
+PortfolioProfile
+- Purpose: Root CMS entity for one user's portfolio.
+- Owns hero, about, projects, skills, experiences, contact, social links, and
+  media assets.
+- userId is unique to enforce one profile per user.
+- isPublic controls public visibility.
+
+HeroSection
+- Purpose: Hero content for first viewport.
+- One-to-one with PortfolioProfile.
+- Contains title, subtitle, CTAs, image URL, badge label/title, order, and
+  visibility flag.
+
+AboutSection
+- Purpose: About section content.
+- One-to-one with PortfolioProfile.
+- details is JSON to support label/value rows.
+- abilities and progress are string arrays.
+
+Project
+- Purpose: Portfolio project cards.
+- Many-to-one with PortfolioProfile.
+- tags are string array.
+- Includes featured, visibility, and order fields.
+- Indexes optimize visible ordered profile queries.
+
+Skill
+- Purpose: Future structured skill model.
+- Currently about abilities are rendered from AboutSection, but Skill exists for
+  future richer skill dashboards.
+
+Experience
+- Purpose: Shared model for services, education, and general experience.
+- type determines usage:
+  - service
+  - education
+  - experience
+- Includes icon, organization, period, actionLabel, startsAt, endsAt, order,
+  visibility, and featured flags.
+
+ContactInfo
+- Purpose: Contact CTA and footer information.
+- One-to-one with PortfolioProfile.
+
+SocialLink
+- Purpose: External social/profile links.
+- Many-to-one with PortfolioProfile.
+- Ordered and visibility-aware.
+
+MediaAsset
+- Purpose: Gallery and future uploaded media.
+- Supports IMAGE, VIDEO, DOCUMENT, OTHER.
+- Includes provider and publicId for future Cloudinary integration.
+
+ShareLink
+- Purpose: Human-readable public portfolio share URLs.
+- Belongs to User.
+- Supports customAlias, active toggle, expiration, visit count, and last-opened
+  timestamp.
+- Indexes userId + active and expiresAt.
+
+VisitorAnalytics
+- Purpose: Basic share-link analytics.
+- Stores path, referrer, user agent, hashed IP, and timestamp.
+- Belongs optionally to User and ShareLink.
+
+7.3 Ownership Rules
+-------------------
+- User owns PortfolioProfile.
+- PortfolioProfile owns content.
+- User owns ShareLink.
+- VisitorAnalytics may reference User and ShareLink, but uses SetNull on delete
+  to avoid destructive analytics coupling.
+
+
+======================================================================
+8. AUTHENTICATION SYSTEM
+======================================================================
+
+8.1 Login and Signup
+--------------------
+Signup page:
+- /auth/signup
+- Uses AuthForm in signup mode.
+- Calls signupAction.
+- Validates email/password/name with zod.
+- Hashes password with bcryptjs using cost 12.
+- Creates User and initial PortfolioProfile with default content.
+- Signs in with credentials and redirects to /dashboard.
+
+Login page:
+- /auth/login
+- Uses AuthForm in login mode.
+- Calls loginAction.
+- Auth.js Credentials provider checks email and bcrypt password.
+- Redirects to /dashboard on success.
+
+Logout:
+- logoutAction calls signOut and redirects to /.
+
+8.2 Session Handling
+--------------------
+Auth.js configuration:
+- JWT session strategy.
+- maxAge: 30 days.
+- Secure production cookie name uses __Secure- prefix.
+- Cookie is httpOnly, sameSite lax, path /, and secure in production.
+
+Session callback adds:
+- user.id
+- user.role
+- user.username
+
+JWT callback stores:
+- role
+- username
+
+8.3 Dashboard Protection
+------------------------
+Dashboard protection occurs in two places:
+- middleware.js checks session-cookie presence before allowing /dashboard.
+- dashboard/page.js calls auth() and redirects to /auth/login if no session.
+
+The route-level auth() check is authoritative. Middleware is an early redirect
+optimization.
+
+8.4 Role Handling
+-----------------
+UserRole enum supports USER and ADMIN. Current dashboard access only requires an
+authenticated session. Role-based admin policy is prepared but not yet enforced
+in dashboard routes.
+
+
+======================================================================
+9. ADMIN DASHBOARD SYSTEM
+======================================================================
+
+9.1 Route
+---------
+/dashboard
+
+9.2 Dashboard Layout
+--------------------
+The dashboard uses a cinematic glassmorphism layout:
+- Ambient background layers.
+- Sticky sidebar on large screens.
+- Content cards for edit panels.
+- Responsive grid forms.
+
+9.3 Editable Modules
+--------------------
+Implemented dashboard modules:
+- Profile & URLs
+  - displayName
+  - username
+  - slug
+  - location
+  - headline
+  - bio
+  - avatarUrl
+
+- Hero Section
+  - eyebrow
+  - title
+  - highlighted
+  - imageUrl
+  - subtitle
+  - CTAs
+  - badge label/title
+
+- Contact Section
+  - title
+  - description
+  - email
+  - primary CTA
+  - secondary CTA
+
+- Section Content JSON panels
+  - about
+  - services
+  - projects
+  - education
+  - gallery
+  - social links
+
+- Share Links
+  - create share links
+  - custom alias
+  - note/title
+  - expiration date
+  - enable/disable links
+  - visit count display
+  - last-opened display
+
+9.4 Content Update Flow
+-----------------------
+Admin form submit:
+  dashboard/page.js form
+  -> server action in dashboardActions.js
+  -> auth() session validation
+  -> Prisma mutation
+  -> revalidatePath("/")
+  -> revalidatePath("/dashboard")
+
+9.5 Current CRUD Coverage
+-------------------------
+Implemented:
+- Profile update.
+- Hero upsert.
+- Contact upsert.
+- Share link create/toggle.
+- Section JSON replace/update for services, projects, education, gallery,
+  about, and social links.
+- Protected API project create.
+
+Pending richer CRUD:
+- Row-level dashboard UI for projects/services/media.
+- Inline editing with optimistic updates.
+- Delete/archive controls per item.
+- Drag-and-drop ordering.
+- Upload provider integration.
+
+
+======================================================================
+10. SHAREABLE PORTFOLIO LINK SYSTEM
+======================================================================
+
+10.1 URL Strategy
+-----------------
+The system supports premium human-readable portfolio URLs:
+- /portfolio/[slug]
+- /u/[username]
+- /view/[identifier]
+
+Examples:
+- /portfolio/john-doe
+- /u/alex-tamang
+- /view/john-doe-a12f
+- /view/custom-client-link
+
+10.2 Slug Fields
+----------------
+User model includes:
+- username
+- slug
+- publicIdentifier
+- shareCode
+
+ShareLink includes:
+- slug
+- customAlias
+- title
+- note
+- active
+- expiresAt
+- visitCount
+- lastOpenedAt
+
+10.3 Generation Logic
+---------------------
+createShareLinkAction:
+- Reads customAlias from form.
+- Slugifies input.
+- Falls back to provided slug, user name, user email, or user id suffix.
+- Appends shortSuffix(user.id) to reduce collision risk.
+- Stores customAlias when provided.
+
+10.4 Validation Flow
+--------------------
+/view/[identifier]
+  -> resolveShareLink(identifier)
+  -> find ShareLink by slug or customAlias
+  -> reject if missing
+  -> reject if active is false
+  -> reject if expiresAt is in the past
+  -> increment visitCount
+  -> update lastOpenedAt
+  -> create VisitorAnalytics
+  -> load owner portfolio
+  -> render ComponentsPage
+
+Invalid or expired links redirect to:
+- /access-denied
+
+10.5 Analytics
+--------------
+VisitorAnalytics stores:
+- userId
+- shareLinkId
+- path
+- referrer
+- userAgent
+- ipHash
+- createdAt
+
+The IP hash uses AUTH_SECRET or NEXTAUTH_SECRET as part of the hash input.
+
+
+======================================================================
+11. ANIMATION SYSTEM
+======================================================================
+
+11.1 Animation Principles
+-------------------------
+The public experience should feel like one uninterrupted cinematic sequence:
+- no hard section boundaries
+- overlapping visual layers
+- persistent ambient background
+- section crossfades
+- global parallax
+- pinned hero
+- progressive reveals before full viewport entry
+
+11.2 GSAP Registration
+----------------------
+src/app/lib/gsapClient.js:
+- imports gsap and ScrollTrigger.
+- registers ScrollTrigger once.
+- configures ignoreMobileResize.
+- provides prefersReducedMotion helper.
+- provides sectionTrigger helper.
+
+11.3 Hero Pinning
+-----------------
+usePinnedSection:
+- Creates pinned ScrollTrigger timeline.
+- Pins hero from top.
+- Scrubs media scale/blur.
+- Fades and moves content upward.
+- Reduces overlay opacity.
+- Uses cleanup via ctx.revert().
+
+11.4 Scroll Reveals
+-------------------
+useScrollReveal:
+- js-reveal: fades, translates, and unblurs text/content.
+- js-image-reveal: fades, scales, unblurs, and restores saturation.
+- js-mask-reveal: animates CSS mask and clip-path circle.
+- Reveals start early, before section is fully in viewport.
+
+11.5 Continuous Parallax
+------------------------
+useParallax:
+- Selects [data-speed] layers.
+- Moves layers against full page scrollTrigger from top to bottom.
+- Desktop and mobile use different travel distances.
+- Avoids section-local parallax resets.
+
+11.6 Cinematic Scrub and Section Linking
+----------------------------------------
+useCinematicScrub:
+- Animates global ambient CSS variable --scene-progress.
+- Moves/fades light leaks.
+- Scrubs js-scrub elements.
+- Crossfades outgoing section while incoming section begins early.
+- Applies clip-path diagonal wipe transitions.
+
+11.7 Smooth Scrolling
+---------------------
+useSmoothScroll:
+- Custom inertia implementation.
+- Uses requestAnimationFrame.
+- Intercepts wheel and touchmove.
+- Uses lerp toward target scroll position.
+- Calls ScrollTrigger.update().
+- Handles anchor clicks.
+- Cleans listeners on unmount.
+
+11.8 Ambient Layers
+-------------------
+AmbientMotion and globals.css define:
+- fixed cinematic ambient root
+- animated color fields
+- glows
+- fog strips
+- particles
+- grain
+- vignette
+- light leaks
+
+11.9 Performance Practices
+--------------------------
+- Transform/opacity/filter based animations.
+- will-change hints for animated classes.
+- GSAP contexts for cleanup.
+- matchMedia for mobile-specific parallax.
+- reduced-motion escape paths.
+
+
+======================================================================
+12. FOLDER STRUCTURE
+======================================================================
+
+Root files:
+- package.json
+  Scripts and dependencies.
+- next.config.mjs
+  Next.js config and remote image patterns.
+- prisma.config.ts
+  Prisma 7 datasource/migration configuration.
+- middleware.js
+  Dashboard route protection.
+- vercel.json
+  Vercel install/build configuration.
+- .env.example
+  Required environment variable names.
+- README.md
+  Setup and deployment guide.
+- PROJECT_SRS.txt
+  Long-term architecture and requirements reference.
+
+src/app:
+- App Router pages, layouts, route handlers, and global CSS.
+
+src/app/components:
+- Public portfolio UI sections and animation components.
+
+src/app/hooks:
+- Client-side animation and scroll hooks.
+
+src/app/lib:
+- GSAP client helper.
+
+src/actions:
+- Server actions for auth and dashboard mutations.
+
+src/services:
+- Server-side business/data services.
+
+src/lib:
+- Shared backend utilities such as Prisma client, security helpers, and slug
+  helpers.
+
+src/data:
+- Fallback default portfolio content used when database is not ready or public
+  content is missing.
+
+prisma:
+- Prisma schema and migrations.
+
+src/app/api:
+- Route handlers for Auth.js and protected admin APIs.
+
+src/app/dashboard:
+- Protected CMS dashboard.
+
+src/app/auth:
+- Login/signup UI.
+
+
+======================================================================
+13. ENVIRONMENT VARIABLES
+======================================================================
+
+Required variables:
+
+DATABASE_URL
+- Runtime PostgreSQL connection string.
+- For Neon, this may use the pooled -pooler host.
+
+DIRECT_URL
+- Direct PostgreSQL connection string used by Prisma migrations.
+- For Neon, this should not use the -pooler host.
+
+NEXTAUTH_SECRET
+- Secret used by NextAuth/Auth.js session signing and security.
+
+AUTH_SECRET
+- Auth.js secret. Also used by project IP hash fallback logic.
+
+CLOUDINARY_URL
+- Reserved for future media upload/storage integration.
+
+NEXT_PUBLIC_APP_URL
+- Public application URL used for share-link display and deployment-aware
+  generated links.
+
+
+======================================================================
+14. API DOCUMENTATION
+======================================================================
+
+14.1 Auth Route
+---------------
+Route:
+  /api/auth/[...nextauth]
+
+Methods:
+  GET, POST
+
+Purpose:
+  Auth.js authentication callbacks, credentials login flow, session endpoints,
+  and sign-in/sign-out support.
+
+14.2 Admin Portfolio API
+------------------------
+Route:
+  /api/admin/portfolio
+
+GET:
+- Requires authenticated session.
+- Rate limit: 60 requests per minute per user/method.
+- Returns normalized portfolio data for current user.
+
+PATCH:
+- Requires authenticated session.
+- Validates payload:
+  - displayName: optional string 2-80
+  - headline: optional nullable string max 160
+  - bio: optional nullable string max 2000
+  - location: optional nullable string max 120
+  - avatarUrl: optional nullable string max 500
+- Updates PortfolioProfile for current user.
+
+14.3 Admin Projects API
+-----------------------
+Route:
+  /api/admin/projects
+
+POST:
+- Requires authenticated session.
+- Rate limit: 40 requests per minute per user/method.
+- Validates payload:
+  - title: string 2-120
+  - description: string 3-1500
+  - imageUrl: optional nullable string max 500
+  - tags: string array, each max 40
+  - featured: boolean
+- Creates Project under authenticated user's profile.
+
+14.4 Server Actions
+-------------------
+Server actions are used for form-based dashboard and auth flows rather than
+pure JSON APIs. They perform auth checks, validation, Prisma writes, and route
+revalidation.
+
+
+======================================================================
+15. SECURITY ARCHITECTURE
+======================================================================
+
+15.1 Password Security
+----------------------
+- Passwords are never stored directly.
+- signupAction hashes passwords with bcryptjs cost factor 12.
+- login compares submitted password with stored passwordHash.
+
+15.2 Session Security
+---------------------
+- Auth.js JWT session strategy.
+- 30-day max age.
+- Secure cookie enabled in production.
+- httpOnly cookie prevents client-side JavaScript access.
+- sameSite lax reduces CSRF exposure for typical navigation.
+
+15.3 Route Protection
+---------------------
+- /dashboard protected by middleware cookie check.
+- dashboard/page.js performs auth() session validation.
+- Admin APIs perform auth() validation.
+- Server actions perform auth() validation through requireUser().
+
+15.4 CSRF Considerations
+------------------------
+- Auth.js handles auth route CSRF behavior.
+- Server actions are framework-mediated and tied to same-origin application
+  flows.
+- Future public JSON mutation endpoints should add stricter CSRF/rate-limiting
+  controls if exposed.
+
+15.5 Validation
+---------------
+- zod validates credentials and several dashboard/API payloads.
+- JSON section editing currently has basic structure checks and should be
+  hardened with section-specific schemas.
+
+15.6 Rate Limiting
+------------------
+- src/lib/security.js implements in-memory rate limiting.
+- Current API routes use per-user/method keys.
+- Production multi-instance deployments should move rate limiting to a durable
+  shared store such as Redis, Upstash, or Vercel KV.
+
+15.7 Data Ownership
+-------------------
+- Dashboard actions derive profileId from authenticated user id.
+- Share-link toggles use updateMany with id and userId to prevent cross-user
+  writes.
+- Admin APIs use authenticated user id to scope queries.
+
+
+======================================================================
+16. PERFORMANCE OPTIMIZATION
+======================================================================
+
+16.1 Frontend
+-------------
+- GSAP animations use transform, opacity, filter, clip-path, and CSS variables.
+- Animated nodes use will-change hints.
+- GSAP contexts clean up timelines and ScrollTriggers.
+- Reduced motion support disables heavy effects.
+- Gallery initially displays a subset and expands on demand.
+
+16.2 Backend
+------------
+- Portfolio service uses React cache for primary and owner portfolio reads.
+- Prisma queries include relation filters and ordered includes.
+- Public page falls back to default data when DB is unavailable, keeping the
+  site renderable during setup.
+
+16.3 Build
+----------
+- package build script runs prisma generate before next build.
+- This is required for fresh Vercel installs.
+
+16.4 Known Optimization Opportunities
+-------------------------------------
+- Replace remaining img tags with next/image.
+- Add image upload transformations and responsive sizes.
+- Add dashboard module lazy loading if dashboard grows.
+- Add cache invalidation by tag for more granular revalidation.
+- Move rate limiting to durable infra.
+
+
+======================================================================
+17. RESPONSIVE DESIGN STRATEGY
+======================================================================
+
+17.1 Desktop
+------------
+- Desktop keeps the full navbar.
+- Hamburger and mobile drawer are hidden at lg and above.
+- Public sections use wide cinematic layouts and global atmospheric layers.
+
+17.2 Mobile and Small Tablets
+-----------------------------
+- Mobile uses hamburger navigation.
+- Drawer slides from the side with backdrop blur.
+- Touch scrolling remains supported by useSmoothScroll.
+- Section layouts collapse to single-column patterns through Tailwind classes.
+
+17.3 Accessibility
+------------------
+- Reduced-motion users receive disabled/short-circuited animations.
+- Buttons and navigation expose labels where critical.
+- Future work should add richer keyboard focus states and aria metadata to
+  dashboard forms.
+
+
+======================================================================
+18. DEPLOYMENT NOTES
+======================================================================
+
+18.1 Vercel Root Directory
+--------------------------
+The Git repository root is the parent folder:
+  My_Portfolio
+
+The Next app is nested:
+  My_Portfolio/my_portfolio
+
+Vercel must set:
+  Root Directory: my_portfolio
+
+If Vercel deploys the parent folder, production may show:
+  404: NOT_FOUND
+
+18.2 Vercel Commands
+--------------------
+Install command:
+  pnpm install
+
+Build command:
+  pnpm build
+
+The project includes vercel.json with these values.
+
+18.3 Prisma Commands
+--------------------
+Local development migration:
+  pnpm prisma migrate dev --name init
+
+Production migration:
+  pnpm prisma migrate deploy
+
+Generate client:
+  pnpm prisma generate
+
+18.4 Neon Notes
+---------------
+Use DATABASE_URL for runtime. It may use the pooled host:
+  ...-pooler...
+
+Use DIRECT_URL for migrations. It should use the non-pooler host:
+  no "-pooler" in hostname
+
+Do not run prisma db pull against a fresh empty database. It will return P4001
+because there are no tables to introspect.
+
+
+======================================================================
+19. FUTURE IMPROVEMENTS / ROADMAP
+======================================================================
+
+19.1 Dashboard and CMS
+----------------------
+- Replace JSON section editors with dedicated row-based CRUD forms.
+- Add drag-and-drop ordering.
+- Add inline editing and optimistic UI.
+- Add preview mode before publishing.
+- Add draft/published workflow.
+- Add validation schemas for every editable section.
+
+19.2 Analytics
+--------------
+- Build analytics dashboard for share-link visits.
+- Add charts for visits by day, referrer, and route.
+- Add device/browser breakdown.
+- Add privacy-aware location analytics if appropriate.
+
+19.3 Media
+----------
+- Integrate Cloudinary uploads.
+- Add MediaAsset provider/publicId lifecycle cleanup.
+- Add image cropping and alt-text enforcement.
+- Convert gallery and project images to next/image.
+
+19.4 Multi-User Platform
+------------------------
+- Enforce role-based permissions.
+- Add admin/superadmin management.
+- Support multiple portfolios per user if needed.
+- Add organization/team ownership.
+
+19.5 Theming and Personalization
+--------------------------------
+- Add theme presets.
+- Add cinematic intensity controls.
+- Add color palette editor.
+- Add section visibility toggles in dashboard UI.
+
+19.6 Realtime Features
+----------------------
+- Add realtime preview of dashboard edits.
+- Add live collaborative editing if multi-admin support is needed.
+
+19.7 AI Personalization
+-----------------------
+- Generate summaries, project descriptions, and profile copy.
+- Generate share-link-specific landing copy.
+- Suggest portfolio improvements from analytics.
+
+
+======================================================================
+20. DEVELOPER TODO CHECKLIST
+======================================================================
+
+20.1 Frontend
+-------------
+[x] Preserve cinematic one-page public portfolio.
+[x] Convert public sections to receive dynamic data props.
+[x] Add global ambient background system.
+[x] Preserve desktop navbar and mobile drawer behavior.
+[x] Add access-denied cinematic page.
+[ ] Replace remaining img tags with next/image in projects and gallery.
+[ ] Render SocialLink data dynamically in contact footer instead of fixed SVGs.
+[ ] Add stronger keyboard focus styling for dashboard controls.
+[ ] Add loading and success states for dashboard server actions.
+
+20.2 Backend
+------------
+[x] Add Prisma schema for users, auth, portfolio content, share links, and
+    analytics.
+[x] Add Prisma 7 config with DIRECT_URL migration support.
+[x] Add Prisma Client singleton.
+[x] Add portfolio read service and data normalization.
+[x] Add share-link resolution service.
+[ ] Add complete CRUD APIs for all content models.
+[ ] Add update/delete APIs for individual projects, media, services, and social
+    links.
+[ ] Add seed script for local development.
+
+20.3 Authentication and Security
+--------------------------------
+[x] Add signup/login/logout.
+[x] Hash passwords with bcryptjs.
+[x] Add Auth.js credentials provider.
+[x] Protect dashboard with middleware and server-side auth check.
+[x] Add basic in-memory API rate limiting.
+[ ] Move rate limiting to durable shared store for production.
+[ ] Enforce role-based dashboard access if multiple roles become active.
+[ ] Add stricter zod validation to JSON section editor.
+[ ] Add audit logging for dashboard mutations.
+
+20.4 Dashboard
+--------------
+[x] Add cinematic dashboard shell.
+[x] Add profile editor.
+[x] Add hero editor.
+[x] Add contact editor.
+[x] Add share-link create/toggle UI.
+[x] Add JSON editors for about, services, projects, education, gallery, socials.
+[ ] Replace JSON editors with structured CMS panels.
+[ ] Add media upload manager.
+[ ] Add visit analytics charts.
+[ ] Add copy-to-clipboard button for share URLs.
+
+20.5 Animations
+---------------
+[x] Add GSAP ScrollTrigger registration helper.
+[x] Add pinned hero timeline.
+[x] Add scroll reveal hooks.
+[x] Add page-wide parallax.
+[x] Add section linking/crossfade timelines.
+[x] Add custom smooth scrolling.
+[x] Add reduced-motion support.
+[ ] Add visual regression tests for desktop/mobile animation states.
+[ ] Tune mobile smooth-scroll intensity if UX testing requires it.
+
+20.6 Performance
+----------------
+[x] Use transform/opacity/filter based animation patterns.
+[x] Use GSAP cleanup through contexts.
+[x] Cache portfolio service reads.
+[x] Keep public portfolio renderable with fallback data.
+[ ] Add image optimization and responsive sizes.
+[ ] Add dashboard module-level lazy loading if dashboard expands.
+[ ] Add production cache tags for granular revalidation.
+
+20.7 Deployment
+---------------
+[x] Add Vercel config.
+[x] Ensure build runs prisma generate before next build.
+[x] Document nested Vercel root directory requirement.
+[x] Document Neon pooled/direct URL split.
+[x] Add .env.example.
+[ ] Confirm Vercel environment variables are set in production.
+[ ] Run pnpm prisma migrate deploy against production database.
+[ ] Verify /, /auth/login, /dashboard, /portfolio/[slug], /u/[username], and
+    /view/[identifier] after deployment.
+
+======================================================================
+END OF DOCUMENT
+======================================================================
